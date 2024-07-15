@@ -1,0 +1,25 @@
+Podstawowa wersja zbioru danych po przejściu wstępnego oczyszczania danych składa się z 22 kolumn oraz 2227 wierszy.
+Poniżej przedstawione zostaną nazwy kolumn wraz z krótkim opisem oraz typem danych, które zawierają
+
+1. id - unikalny identyfikator ogłoszenia (int)
+2. price - cena mieszkania z ogłoszenia (int - pln)
+3. price/m - cena za metr kwadratowy (int - pln/m^2)
+4. rooms - liczba pokoi w mieszkaniu (int)
+5. city - miasto na terenie którego znajduje się mieszkanie z ogłoszenia (varchar)
+6. district - dzielnica miasta w której znajduje się mieszkanie (varchar)
+7. street - ulica na której znajduje się mieszkanie (varchar) - nie wszystkie ogłoszenia podają ulice
+8. status - status mieszkania (do wykończenia/Do zamieszkania) (varchar)
+9. meters- powierzchnia mieszkania (float - m)
+10. apartment_floors - liczba poziomów mieszkania (int)
+11. bathroom - liczba łazienek w mieszkaniu (int)
+12. terrace - Posiadanie tarasu - tak/nie (varchar)
+13. market - rynek pierwotny/wtórny (varchar)
+14. building - typ budynku np. dom wielorodzinny, kamienica, blok (varchar)
+15. material - materiał budowlany np. pustak, cegła, wielka płyta (varchar)
+16. year - rok ukończenia budowy mieszkania (int)
+17. adv_date - data umieszczenia ogłoszenia (date - yyyy-mm-dd)
+18. upvotes - Liczba podpić ogłoszenia (int)
+19. floor - piętro na którym usytuowane jest mieszkanie z ogłoszenia (int)
+20. building_floors - ogólna liczba pięter całego budynku, w którym znajduje się mieszkanie (int)
+21. bedroom - Liczba sypialni w mieszkaniu (int)
+22. balcony - Posiadanie balkonu tak/nie (varchar)

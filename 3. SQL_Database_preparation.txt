@@ -1,0 +1,34 @@
+<PostgreSQL - pg admin4>
+
+CREATE DATABASE real_estate;
+
+--use real_estate in dbms
+
+
+CREATE TABLE IF NOT EXISTS public.real_estate_test
+(
+    id integer NOT NULL,
+    "price" integer NOT NULL,
+    "price/m" integer,
+    "rooms" integer,
+    "city" character varying(100) COLLATE pg_catalog."default",
+    "district" character varying(100) COLLATE pg_catalog."default",
+    "street" character varying(100) COLLATE pg_catalog."default",
+    "status" character varying(100) COLLATE pg_catalog."default",
+    "meters" character varying(100) COLLATE pg_catalog."default",
+    "apartment_floors" integer DEFAULT 1,
+    "bathroom" integer DEFAULT 1,
+    "terrace" character varying(100) COLLATE pg_catalog."default" DEFAULT 'Nie'::character varying,
+    "market" character varying(100) COLLATE pg_catalog."default",
+    "building" character varying(100) COLLATE pg_catalog."default",
+    "material" character varying(100) COLLATE pg_catalog."default",
+    "year" integer,
+    "adv_date" date,
+    "upvotes" integer,
+    "floor" integer,
+    "building_floors" integer,
+    "bedroom" integer DEFAULT 1,
+    "balcony" character varying(100) COLLATE pg_catalog."default" DEFAULT 'Nie'::character varying,
+    "heating" character varying(100) COLLATE pg_catalog."default",
+    CONSTRAINT real_estate_core_pkey PRIMARY KEY (id)
+);

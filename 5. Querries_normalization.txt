@@ -1,0 +1,376 @@
+<PostgreSQL - pg admin4>
+
+
+--Sprawdzenie danych
+SELECT * FROM real_estate_core;
+
+--Normalizacja
+--Stworzenie tabeli zawierającej podstawowe informacje o mieszkaniu
+CREATE TABLE apartment (
+	id INTEGER PRIMARY KEY,
+	price INTEGER,
+	meters REAL,
+	floor INTEGER,
+	apartment_floors INTEGER,
+	status VARCHAR(100),
+	rooms INTEGER
+);
+
+INSERT INTO apartment
+SELECT
+	id + 1 AS id,
+	price,
+	meters,
+	floor,
+	apartment_floors,
+	status,
+	rooms
+FROM real_estate_core;
+
+--check
+SELECT * FROM apartment;
+
+
+
+
+
+--Stworzenie tabel zawierających informacje o dodatkowych udogodnieniach mieszkania
+--W pierwszej kolejności tworzę tabelę definiującą każde występujące udogodnienie
+CREATE TABLE additions(
+	addition_id SERIAL PRIMARY KEY,
+	addition_name VARCHAR(50)
+);
+
+INSERT INTO additions (addition_name) VALUES
+	('terrace'),
+	('balcony'),
+	('multiple_bedrooms'),
+	('multiple_bathrooms');
+
+--Check
+SELECT * FROM additions;
+
+
+
+
+
+--Następnie tworzę tabelę zawierającą id mieszkania oraz id udogodnienia (odwołują się do poprzednio utworzonych tabel)
+CREATE TABLE apartment_additions (
+	apartment_id INTEGER,
+	addition_id INTEGER,
+	FOREIGN KEY (apartment_id) REFERENCES apartment (id),
+	FOREIGN KEY (addition_id) REFERENCES additions (addition_id)
+);
+
+--Dodaje do tabeli id mieszkania oraz id udogodnienia jeśli takowe występuje
+--jeśli mieszkanie posiada taras do nowej tabeli dodam id mieszkania oraz id udogodnienia oznaczającego taras (1)
+INSERT INTO apartment_additions
+	SELECT
+		id+1 AS apartment_id,
+		1 AS addition_id
+	FROM real_estate_core
+	WHERE terrace = 'Tak';
+
+--Jeśli mieszkanie posiada balkon do odpowiedniego id mieszkania dodam id udogodnienia jakim jest balkon (2)
+INSERT INTO apartment_additions
+	SELECT
+		id+1 AS apartment_id,
+		2 AS addition_id
+	FROM real_estate_core
+	WHERE balcony = 'Tak';
+
+--Jeśli mieszkanie ma więcej niż 1 sypialnie dodam udogodnienia jakim jest wiele sypialnii o indeksie 3
+INSERT INTO apartment_additions
+	SELECT
+		id+1 AS apartment_id,
+		3 AS addition_id
+	FROM real_estate_core
+	WHERE bedroom > 1;
+
+INSERT INTO apartment_additions
+	SELECT
+		id+1 AS apartment_id,
+		4 AS addition_id
+	FROM real_estate_core
+	WHERE bathroom > 1;
+
+--Check
+SELECT * FROM apartment_additions ORDER BY apartment_id;
+
+
+
+
+--Stworzenie tabeli zawierającej informacje o budynku, w którym znajduje się mieszkanie z ogłoszenia
+CREATE TABLE building (
+	apartment_id INTEGER,
+	number_of_floors INTEGER,
+	market_type VARCHAR(50),
+	building_type VARCHAR(50),
+	building_material VARCHAR(50),
+	building_year INTEGER,
+	FOREIGN KEY (apartment_id) REFERENCES apartment (id)
+);
+
+
+
+
+--Normalizacja kolumny z typem rynku
+CREATE TABLE market_key (
+	market_id SERIAL PRIMARY KEY,
+	market_type VARCHAR(50)
+);
+INSERT INTO market_key (market_type)
+	SELECT DISTINCT
+		market
+	FROM real_estate_core;
+
+--Check
+SELECT * FROM market_key;
+
+--Normalizacja kolumny z typem budynku
+CREATE TABLE building_key (
+	building_id SERIAL PRIMARY KEY,
+	building_type VARCHAR(50)
+);
+
+INSERT INTO building_key (building_type)
+	SELECT DISTINCT
+	CASE
+		WHEN building LIKE 'Blok%' THEN 'Blok'
+		ELSE initcap(building)
+	END AS building
+	FROM real_estate_core;
+
+--Check
+SELECT * FROM building_key;
+
+--Normalizacja kolumny z materiałem budynku
+CREATE TABLE material_key (
+	material_id SERIAL PRIMARY KEY,
+	material_type VARCHAR(50)
+);
+
+INSERT INTO material_key (material_type)
+	SELECT DISTINCT initcap(material) FROM real_estate_core;
+
+--Check
+SELECT * FROM material_key;
+
+
+
+
+--Stworzenie znormalizowanej tabeli zawierającej informacje o budynku, w którym znajduje się mieszkanie z ogłoszenia
+CREATE TABLE building (
+	apartment_id INTEGER,
+	floors INTEGER,
+	market_id INTEGER,
+	building_id INTEGER,
+	material_id INTEGER,
+	building_year INTEGER,
+	FOREIGN KEY (apartment_id) REFERENCES apartment (id),
+	FOREIGN KEY (market_id) REFERENCES market_key (market_id),
+	FOREIGN KEY (building_id) REFERENCES building_key (building_id),
+	FOREIGN KEY (material_id) REFERENCES material_key (material_id)
+);
+
+
+--Docelowa tabela zawiera 4 klucze obce, join nie wchodzi w grę (3 tabele z których chce wziąć klucze nie mają żadnych innych kluczy aby połączyć wartości)
+--Aby dopasować klucze z każdej z 3 utworzonych kolumn do swoich oryginalnych wartości zdecydowałem się
+--Wykorzystać tzw. common table expression za pomocą którego tworzę tabelę, w której nanoszę wszelkie poprawki w tekście wartości
+--kolumn market, building, material
+--Następnie przy pomocy podzapytań znajduje z każdej tabeli odpowiednie id które pasuje do wartości rynku, budynku lub materiału
+WITH building_cte AS (
+	SELECT
+		id,
+		building_floors,
+		CASE 
+			WHEN building LIKE 'Blok%' THEN 'Blok'
+			ELSE initcap(building)
+			END AS building,
+		market,
+		initcap(material) AS material,
+		year
+	FROM real_estate_core)
+--Sprawdzenie czy otrzymany wynik jest poprawny	
+SELECT
+	id+1 AS apartment_id,
+	building_floors,
+	(SELECT market_id FROM market_key WHERE market_type = market),
+	market,
+	(SELECT building_id FROM building_key WHERE building_type = building),
+	building,
+	(SELECT material_id FROM material_key WHERE material_type = material),
+	material,
+	year
+FROM building_cte;
+
+--implementacja zmodyfikowanego wyniku (bez kolumn z tekstem) do docelowej tabeli
+INSERT INTO building
+WITH building_cte AS (
+	SELECT
+		id,
+		building_floors,
+		CASE 
+			WHEN building LIKE 'Blok%' THEN 'Blok'
+			ELSE initcap(building)
+			END AS building,
+		market,
+		initcap(material) AS material,
+		year
+	FROM real_estate_core)
+SELECT
+	id+1 AS apartment_id,
+	building_floors,
+	(SELECT market_id FROM market_key WHERE market_type = market),
+	(SELECT building_id FROM building_key WHERE building_type = building),
+	(SELECT material_id FROM material_key WHERE material_type = material),
+	year
+FROM building_cte;
+
+--Check
+SELECT * FROM building;
+
+
+
+
+--Normalizacja informacji odnośnie ogłoszenia
+CREATE TABLE sales_offer (
+	apartment_id INTEGER, 
+	offer_date DATE,
+	upvotes INTEGER,
+	FOREIGN KEY (apartment_id) REFERENCES apartment (id)
+);
+
+INSERT INTO sales_offer
+	SELECT
+		id+1 AS apartment_id,
+		adv_date,
+		upvotes
+	FROM real_estate_core;
+
+--Check
+SELECT * FROM sales_offer;
+
+
+
+
+--Normalizacja danych dotyczących lokalizacji mieszkania
+CREATE TABLE cities (
+	city_id SERIAL PRIMARY KEY,
+	city_name VARCHAR(50)
+);
+
+INSERT INTO cities (city_name)
+	SELECT DISTINCT
+		city
+	FROM real_estate_core;
+
+SELECT * FROM cities;
+
+
+
+
+
+CREATE TABLE districts (
+	city_id INTEGER,
+	district_id SERIAL PRIMARY KEY,
+	district_name VARCHAR(50),
+	FOREIGN KEY (city_id) REFERENCES cities (city_id)
+);
+
+INSERT INTO districts (city_id, district_name)
+	SELECT DISTINCT
+		(SELECT city_id FROM cities WHERE city_name = city),
+		replace(district, ' - ', '-') AS district --Dzielnica Ujeścisko-Łostowice miało różne formy zapisu
+	FROM real_estate_core;
+
+SELECT * FROM districts;
+
+
+
+
+
+CREATE TABLE streets (
+	street_id SERIAL PRIMARY KEY,
+	district_id INTEGER,
+	street_name VARCHAR(100),
+	FOREIGN KEY (district_id) REFERENCES districts (district_id)
+);
+
+
+INSERT INTO streets (district_id, street_name)
+	SELECT DISTINCT
+		(SELECT district_id FROM districts WHERE district_name = district),
+		street
+	FROM real_estate_core
+	WHERE street IS NOT NULL;
+
+SELECT * FROM streets;
+
+
+
+
+
+CREATE TABLE localization (
+	apartment_id INTEGER,
+	city_id INTEGER,
+	district_id INTEGER,
+	street_id INTEGER,
+	FOREIGN KEY (apartment_id) REFERENCES apartment (id),
+	FOREIGN KEY (city_id) REFERENCES cities (city_id),
+	FOREIGN KEY (district_id) REFERENCES districts (district_id),
+	FOREIGN KEY (street_id) REFERENCES streets (street_id)
+);
+
+INSERT INTO localization
+	WITH real_estate_cte AS (
+		SELECT id, city, replace(district, ' - ', '-') AS district, street FROM real_estate_core)
+	SELECT
+		id+1 AS apartment_id,
+		(SELECT city_id FROM cities WHERE city_name = city),
+		(SELECT district_id FROM districts WHERE district_name = district),
+		(SELECT street_id FROM streets WHERE street_name = street)
+	FROM real_estate_cte;
+
+SELECT * FROM localization;
+
+
+
+
+
+
+
+--poprawka normalizacji kolumny zawierającej podstawowe informacje o mieszkaniu (apartment)
+CREATE TABLE status (
+	status_id SERIAL PRIMARY KEY,
+	status_name VARCHAR(50)
+);
+
+INSERT INTO status (status_name)
+	SELECT DISTINCT status FROM real_estate_core WHERE status IS NOT NULL;
+
+SELECT * FROM status;
+
+ALTER TABLE apartment ADD COLUMN status_id INTEGER;
+SELECT * FROM apartment;
+
+UPDATE apartment
+SET status_id = 1
+WHERE status = 'Do zamieszkania';
+
+UPDATE apartment
+SET status_id = 2
+WHERE status = 'Do wykończenia';
+
+ALTER TABLE apartment
+DROP COLUMN status;
+
+SELECT * FROM apartment;
+
+
+
+
+DROP TABLE real_estate_core;
+
+
+--Koniec normalizacji. W dalszym etapie pracy przeprowadzona zostanie podstawowa analiza danych za pomocą SQL
