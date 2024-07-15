@@ -6,3 +6,5 @@ Motywacją do realizacji projektu jest chęć poszerzania spektrum narzędzi pom
 aktualnego stanu rynku oraz najważniejszych czynników wpływających na ceną mieszkania.
 
 pliki oznaczone cyframi 1-8 w początku nazwy oznaczają kolejność powstawania projektu.
+
+W celu implementacji własnych danych dotyczących mieszkania do otrzymania predykcji ceny należy edytować przedostatnią komórkę kodu w pliku oznaczonym cyfrą 8.
