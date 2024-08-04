@@ -1,0 +1,15 @@
+1. Write Python code that reads relevant classes from the HTML code of the provided link, extracts the information and parameters of the apartment from the listing, and saves the data as a DataFrame.
+
+2. Perform preliminary data processing, including removing unnecessary columns, modifying value formats, changing data types in columns, and renaming columns. Prepare the data for further analysis and for the efficient creation of a PostgreSQL database.
+
+3. Prepare the database - create a database, create a table with the number of columns, their names, and data types corresponding to the data from the modified DataFrame in point 2.
+
+4. Write code to read data saved in a CSV file, connect to the database, and upload the data from the file to the SQL table.
+
+5. Normalize the database 
+
+6. Perform exploratory data analysis using SQL query language.
+
+7. Visualize the key relationships resulting from the previous analysis using Python.
+
+8. Prepare the data for modeling and apply machine learning models.

@@ -1,11 +1,11 @@
 <PostgreSQL - pg admin4>
 
 
---Sprawdzenie danych
+--data check
 SELECT * FROM real_estate_core;
 
---Normalizacja
---Stworzenie tabeli zawierającej podstawowe informacje o mieszkaniu
+--Normalization
+--Creation of the table with basic information about the flat
 CREATE TABLE apartment (
 	id INTEGER PRIMARY KEY,
 	price INTEGER,
@@ -34,8 +34,8 @@ SELECT * FROM apartment;
 
 
 
---Stworzenie tabel zawierających informacje o dodatkowych udogodnieniach mieszkania
---W pierwszej kolejności tworzę tabelę definiującą każde występujące udogodnienie
+--Creation of the tables with additional information about the additions of the flat
+--Firstly I create the table that defines very exisiting addtion in dataset
 CREATE TABLE additions(
 	addition_id SERIAL PRIMARY KEY,
 	addition_name VARCHAR(50)
@@ -54,7 +54,7 @@ SELECT * FROM additions;
 
 
 
---Następnie tworzę tabelę zawierającą id mieszkania oraz id udogodnienia (odwołują się do poprzednio utworzonych tabel)
+--Next I create a table with id of the flat and id of the addition (they reffer to the previously created tables
 CREATE TABLE apartment_additions (
 	apartment_id INTEGER,
 	addition_id INTEGER,
@@ -62,8 +62,8 @@ CREATE TABLE apartment_additions (
 	FOREIGN KEY (addition_id) REFERENCES additions (addition_id)
 );
 
---Dodaje do tabeli id mieszkania oraz id udogodnienia jeśli takowe występuje
---jeśli mieszkanie posiada taras do nowej tabeli dodam id mieszkania oraz id udogodnienia oznaczającego taras (1)
+--I add the apartment ID and the amenity ID to the table if such an amenity exists.
+--If the apartment has a terrace, I will add the apartment ID and the amenity ID representing the terrace (1) to the new table.
 INSERT INTO apartment_additions
 	SELECT
 		id+1 AS apartment_id,
@@ -71,7 +71,7 @@ INSERT INTO apartment_additions
 	FROM real_estate_core
 	WHERE terrace = 'Tak';
 
---Jeśli mieszkanie posiada balkon do odpowiedniego id mieszkania dodam id udogodnienia jakim jest balkon (2)
+--If the apartment has a balcony - add 2 (id of the balcony)
 INSERT INTO apartment_additions
 	SELECT
 		id+1 AS apartment_id,
@@ -79,7 +79,7 @@ INSERT INTO apartment_additions
 	FROM real_estate_core
 	WHERE balcony = 'Tak';
 
---Jeśli mieszkanie ma więcej niż 1 sypialnie dodam udogodnienia jakim jest wiele sypialnii o indeksie 3
+--If the apartment has more than one bedroom - add addition '3'
 INSERT INTO apartment_additions
 	SELECT
 		id+1 AS apartment_id,
@@ -100,7 +100,7 @@ SELECT * FROM apartment_additions ORDER BY apartment_id;
 
 
 
---Stworzenie tabeli zawierającej informacje o budynku, w którym znajduje się mieszkanie z ogłoszenia
+--Creation of a table containing information about the building where the advertised apartment is located.
 CREATE TABLE building (
 	apartment_id INTEGER,
 	number_of_floors INTEGER,
@@ -114,7 +114,7 @@ CREATE TABLE building (
 
 
 
---Normalizacja kolumny z typem rynku
+--Normalization of the column with the market type
 CREATE TABLE market_key (
 	market_id SERIAL PRIMARY KEY,
 	market_type VARCHAR(50)
@@ -127,7 +127,7 @@ INSERT INTO market_key (market_type)
 --Check
 SELECT * FROM market_key;
 
---Normalizacja kolumny z typem budynku
+--Normalization of the column with the building type
 CREATE TABLE building_key (
 	building_id SERIAL PRIMARY KEY,
 	building_type VARCHAR(50)
@@ -144,7 +144,7 @@ INSERT INTO building_key (building_type)
 --Check
 SELECT * FROM building_key;
 
---Normalizacja kolumny z materiałem budynku
+--Normalization of the column with the material of the building type 
 CREATE TABLE material_key (
 	material_id SERIAL PRIMARY KEY,
 	material_type VARCHAR(50)
@@ -159,7 +159,7 @@ SELECT * FROM material_key;
 
 
 
---Stworzenie znormalizowanej tabeli zawierającej informacje o budynku, w którym znajduje się mieszkanie z ogłoszenia
+--Creation of a normalized table containing information about the building where the advertised apartment is located.
 CREATE TABLE building (
 	apartment_id INTEGER,
 	floors INTEGER,
@@ -174,11 +174,11 @@ CREATE TABLE building (
 );
 
 
---Docelowa tabela zawiera 4 klucze obce, join nie wchodzi w grę (3 tabele z których chce wziąć klucze nie mają żadnych innych kluczy aby połączyć wartości)
---Aby dopasować klucze z każdej z 3 utworzonych kolumn do swoich oryginalnych wartości zdecydowałem się
---Wykorzystać tzw. common table expression za pomocą którego tworzę tabelę, w której nanoszę wszelkie poprawki w tekście wartości
---kolumn market, building, material
---Następnie przy pomocy podzapytań znajduje z każdej tabeli odpowiednie id które pasuje do wartości rynku, budynku lub materiału
+--The target table contains 4 foreign keys, and joins are not feasible (the 3 tables from which I want to take the keys do not have other keys to connect the values).
+--To match the keys from each of the 3 created columns to their original values, I decided to
+--Use a common table expression (CTE) to create a table where I make all necessary corrections to the text values
+--Of the columns market, building, and material.
+--Then, using subqueries, I find the appropriate IDs from each table that match the values of the market, building, or material."
 WITH building_cte AS (
 	SELECT
 		id,
@@ -204,7 +204,7 @@ SELECT
 	year
 FROM building_cte;
 
---implementacja zmodyfikowanego wyniku (bez kolumn z tekstem) do docelowej tabeli
+--Implementation of the modified result (without text columns) into the target table.
 INSERT INTO building
 WITH building_cte AS (
 	SELECT
@@ -233,7 +233,7 @@ SELECT * FROM building;
 
 
 
---Normalizacja informacji odnośnie ogłoszenia
+--Normalization of the column containing information about the sale offer
 CREATE TABLE sales_offer (
 	apartment_id INTEGER, 
 	offer_date DATE,
@@ -254,7 +254,7 @@ SELECT * FROM sales_offer;
 
 
 
---Normalizacja danych dotyczących lokalizacji mieszkania
+--Normalization of column containing data about localization 
 CREATE TABLE cities (
 	city_id SERIAL PRIMARY KEY,
 	city_name VARCHAR(50)
@@ -340,7 +340,7 @@ SELECT * FROM localization;
 
 
 
---poprawka normalizacji kolumny zawierającej podstawowe informacje o mieszkaniu (apartment)
+--Correction of the normalization of the column containing basic information about the apartment.
 CREATE TABLE status (
 	status_id SERIAL PRIMARY KEY,
 	status_name VARCHAR(50)
@@ -373,4 +373,4 @@ SELECT * FROM apartment;
 DROP TABLE real_estate_core;
 
 
---Koniec normalizacji. W dalszym etapie pracy przeprowadzona zostanie podstawowa analiza danych za pomocą SQL
+--End of normalization. In the next stage, a basic data analysis will be conducted using SQL.

@@ -1,0 +1,3 @@
+The goal of the project is to create a program where users can input parameters from a listing they are interested in, and in return, receive feedback regarding the valuation of the offer (whether the offer is priced appropriately compared to similar ones, whether it is underpriced, or overpriced). The application will also aim to display a forecasted 'appropriate' price for the offer if it is not already accurately priced.
+
+The motivation for this project is to expand the range of tools available for selecting suitable real estate offers, increase awareness of the current state of the market, and highlight the most important factors influencing apartment prices.

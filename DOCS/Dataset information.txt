@@ -1,0 +1,25 @@
+The basic version of the dataset, after preliminary data cleaning, consists of 22 columns and 2,227 rows. 
+Below are the column names along with a brief description and data type they contain:
+
+1.id - Unique identifier for the listing (int)
+2.price - Price of the apartment from the listing (int - PLN)
+3.price/m - Price per square meter (int - PLN/m²)
+4.rooms - Number of rooms in the apartment (int)
+5.city - City where the apartment is located (varchar)
+6.district - District of the city where the apartment is located (varchar)
+7.street - Street where the apartment is located (varchar) - not all listings provide the street
+8.status - Status of the apartment (to be finished/ready to move in) (varchar)
+9.meters - Area of the apartment (float - m²)
+10.apartment_floors - Number of levels in the apartment (int)
+11.bathroom - Number of bathrooms in the apartment (int)
+12.terrace - Presence of a terrace - yes/no (varchar)
+13.market - Primary/secondary market (varchar)
+14.building - Type of building e.g., multi-family house, tenement, block (varchar)
+15.material - Construction material e.g., block, brick, prefabricated panel (varchar)
+16.year - Year of completion of the apartment building (int)
+17.adv_date - Date the listing was posted (date - yyyy-mm-dd)
+18.upvotes - Number of upvotes for the listing (int)
+19.floor - Floor on which the apartment is located (int)
+20.building_floors - Total number of floors in the building where the apartment is located (int)
+21.bedroom - Number of bedrooms in the apartment (int)
+22.balcony - Presence of a balcony - yes/no (varchar)

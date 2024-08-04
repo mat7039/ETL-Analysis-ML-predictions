@@ -1,10 +1,7 @@
-Celem projektu jest stworzenie programu, w którym użytkownik może dodawać parametry z ogłoszenia, którym jest zainteresowany, w rezultacie dostanie odpowiedź odnośnie
-wyceny oferty (czy oferta jest wyceniona adekwatnie do pozostałych podobnych, czy jest przeceniona, czy zawyżona). Aplikacja również ma za zadanie wyświetlać prognozowaną 'adekwatną'
-ceną oferty, jeśli takową nie jest.
+The aim of the project is to create a program in which the user can add parameters from an advertisement they are interested in. As a result, they will receive feedback regarding the valuation of the offer (whether the offer is priced appropriately compared to similar ones, or if it is underpriced or overpriced). The application also aims to display the forecasted 'appropriate' price of the offer if it is not already so.
 
-Motywacją do realizacji projektu jest chęć poszerzania spektrum narzędzi pomagających w wyborze właściwych ofert na rynku nieruchomości, zwiększenie świadomości odnośnie
-aktualnego stanu rynku oraz najważniejszych czynników wpływających na ceną mieszkania.
+The motivation for undertaking the project is the desire to expand the range of tools that help in selecting the right offers on the real estate market, increasing awareness of the current state of the market, and the most important factors affecting the price of an apartment.
 
-pliki oznaczone cyframi 1-8 w początku nazwy oznaczają kolejność powstawania projektu.
+Files marked with numbers 1-8 at the beginning of their names indicate the order of project development.
 
-W celu implementacji własnych danych dotyczących mieszkania do otrzymania predykcji ceny należy edytować przedostatnią komórkę kodu w pliku oznaczonym cyfrą 8.
+To implement your own apartment data to receive a price prediction, you need to edit the penultimate code cell in the file marked with the number 8.

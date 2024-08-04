@@ -1,15 +1,15 @@
 <PostgreSQL - pg admin4>
 
---Średnia cena za metr dla całości zbioru
+--Average price per squared meter for the dataset
 SELECT
 	AVG(price / meters)::INT
 FROM apartment;
 --Średnia cena za metr dla wszystkich mieszkań w zbiorze to 15 091 pln.
 
 
---czy najdroższe mieszkania to największe mieszkania?
---Porównanie cen i metrażu mieszkań o najwyższej cenie oraz mieszkań o największej powierzchni
---średnia cena mieszkań i powierzchnia dla 50 ofert z najwyższą ceną
+--Are the most expensive apartments also the largest?
+--Comparison of prices and sizes of the most expensive apartments and the largest apartments.
+--Average price and size of the top 50 highest-priced offers.
 WITH most_expensive AS (
 	SELECT
 		price,
@@ -22,12 +22,12 @@ SELECT
 	AVG(price)::INT,
 	AVG(meters)::INT
 FROM most_expensive;
---Średnia cena dla 50 najdroższych ofert to 2 907 030pln a średni metraż tych mieszkań to 121m2
+--The average price for the top 50 most expensive offers is 2,907,030 PLN, and the average size of these apartments is 121 m².
 
 
 
 
---średnia cena mieszkań i powierzchnia dla 50 ofert z największą powierzchnią
+--Average price and size of the top 50 largest apartments.
 WITH top_50_meters AS (
 	SELECT
 		price,
@@ -40,14 +40,14 @@ SELECT
 	AVG(price)::INT,
 	AVG(meters)::INT
 FROM top_50_meters;
---Średnia cena dla 50 największych mieszkań to 2 877 230pln, a średnia wielkość tych mieszkań to 129m2
---Wniosek: najdroższe mieszkania to niekoniecznie największe powierzchniowo mieszkania, jednak z pewnością są to mieszkania o ponad przeciętnej powierzchni
+--The average price for the top 50 largest apartments is 2,877,230 PLN, and the average size of these apartments is 129 m².
+--Conclusion: The most expensive apartments are not necessarily the largest in terms of size, but they are certainly apartments with above-average size.
 
 
 
 
 
---Najdroższe piętro (cena/m2)
+--The most expensive floor (price/m2)
 SELECT
 	AVG(price / meters)::INT AS "avg_price/m2",
 	floor
@@ -55,14 +55,14 @@ FROM apartment
 GROUP BY floor
 ORDER BY "avg_price/m2" DESC
 LIMIT 1;
---Średnia najwyższa cena za metr (28 038pln) znajduje się na 6. piętrze
+--The highest average price per square meter (28,038 PLN) is found on the 6th floor.
 
 
 
 
 
---jak status mieszkania wpływa na cenę za metr?
---status w zbiorze danych posiada informację (jeśli występuje) o tym czy mieszkania jest do zamieszkania czy do wykończenia
+-- How does the apartment status affect the price per square meter?
+-- The status in the dataset provides information (if available) on whether the apartment is ready to move in or needs finishing
 SELECT
 	AVG(a.price / a.meters)::INT as avg_pricem2,
 	s.status_name
@@ -71,14 +71,16 @@ LEFT JOIN status AS s
 	ON a.status_id = s.status_id
 WHERE a.status_id IS NOT NULL
 GROUP BY s.status_name;
---Średnio mieszkania gotowe do zamieszkania są o 1700pln (za metr kw.) droższe od mieszkań wymagających wykończenia
+
+--On average, apartments that are ready to move in are more expensive (1700pln per m2) 
 
 
 
 
 
---Jak poszczególne udogodnienia wpływają na cenę?
---W zbiorze danych wyróżniono szereg udogodnień w mieszkaniach takich jak: taras, balkon, wiele sypialni, wiele łazienek
+
+-- How do various amenities affect the price?
+-- The dataset highlights a range of amenities in apartments such as: terrace, balcony, multiple bedrooms, multiple bathrooms
 SELECT
 	AVG(a.price / a.meters)::INT as avg_pricem2,
 	add.addition_name
@@ -88,17 +90,17 @@ LEFT JOIN additions AS "add"
 LEFT JOIN apartment AS a
 	ON aadd.apartment_id = a.id
 GROUP BY add.addition_name;
---Najniższa cena za metr występuje w ogłoszeniach posiadających taras (najprawdopodobniej są to domy o dużym metrażu i niskiej cenie za metr)
---Najwyższa cena za metr to mieszkania o większej niż 1 ilości sypialni (prawdopodobnie niemałe luksusowe mieszkania)
---Co ciekawe ilość sypialni zdaje się mieć wpływ na cenę, jednakże większa ilość łazienek zdaje się mieć cenę za metr raczej niską
---Mieszkania z balkonem mają cenę najbardziej zbliżoną to średniej ceny dla całości zbioru
+
+-- The lowest price per square meter is found in listings with a terrace (these are likely large houses with a low price per square meter)
+-- The highest price per square meter is for apartments with more than one bedroom (likely sizable luxury apartments)
+-- Interestingly, the number of bedrooms seems to influence the price, but a higher number of bathrooms appears to have a rather low price per square meter
+-- Apartments with a balcony have a price closest to the average price for the entire dataset
 
 
 
 
-
---Jak zmienne w budynku wpływają na cenę za metr
---zmienne budynku to: rynek(wtórny/pierwotny), ogólna ilość pięter, typ zabudowy, rodzaj materiału do budowy, rok budowy
+-- How do building variables affect the price per square meter?
+-- Building variables include: market (secondary/primary), total number of floors, type of building, construction material, year of construction
 WITH building_info AS(
 	SELECT
 		a.price AS price,
@@ -123,7 +125,8 @@ SELECT
 	market
 FROM building_info
 GROUP BY market;
---Średnia cena za m2 z uwzględnieniem rynku jest wyższa o prawie 3000pln dla rynku wtórnego
+--Average price per m2 considering the market type is nearly 3000 pln higher for the secondary market 
+
 
 WITH building_info AS(
 	SELECT
@@ -150,7 +153,7 @@ SELECT
 FROM building_info
 GROUP BY floors
 ORDER BY avg_pricem2 DESC;
---Najdroższe mieszkania za metr są w budynkach, które mają 6 pięter lub 1 piętro
+--The most expensive apartments (per meter) are in the buildings that have either 6 or 1 floors
 
 
 WITH building_info AS(
@@ -178,8 +181,7 @@ SELECT
 FROM building_info
 GROUP BY "type"
 ORDER BY avg_pricem2 DESC;
---Najdroższe mieszkania za metr są w kamienicach
-
+--The most expensive apartments (per meter) are in the townhouses
 
 
 
@@ -208,7 +210,7 @@ SELECT
 FROM building_info
 GROUP BY material
 ORDER BY avg_pricem2 DESC;
---W materiałach nie ma zauważalnej różnicy cen (za metr), jednak jako najdroższe plasują się mieszkania z konstrukcji żelbetowej
+-- There is no noticeable difference in price per square meter among materials, but apartments with reinforced concrete construction are the most expensive
 
 
 
@@ -244,23 +246,26 @@ SELECT
 FROM building_info
 GROUP BY years
 ORDER BY avg_pricem2 DESC;
---Najdroższe mieszkania (za metr) znajdują się w budynkach z lat 1990-2010 lub w bardzo starych (1930 i starsze) (prawdopodobnie stare kamienice)
---Najtańsze mieszkania (za metr) to mieszkania stosunkowo nowe (od 2011 do teraz)
+-- The most expensive apartments (per square meter) are located in buildings from 1990-2010 or in very old ones (1930 and earlier) (likely old tenement houses)
+-- The cheapest apartments (per square meter) are relatively new (from 2011 to the present)
 
 
 
---Jaki jest średni rok budowy budynku z ogłoszenia
+-- What is the average construction year of the building in the listing?
 SELECT
 	AVG(building_year)::INT
 FROM building;
---Śreni rok budowy dla zbioru danych to 2003
+-- The average construction year for the dataset is 2003
 
 
 
---Jaki jest średni rok budowy wśród ogłoszeń o największej popularności (największa liczba podbić ogłoszenia na stronie)
+-- What is the average construction year among the most popular listings (highest number of upvotes)?
 SELECT ROUND((SELECT COUNT(*) FROM sales_offer WHERE upvotes > 300) / COUNT(*)::DECIMAL, 2) FROM sales_offer;
---Metodą prób i błędów uznałem za kryterium liczbę 300 podbić ogłoszenia
---liczba ogłoszeń z liczbą podbić większą niż 300 to prawie 1/4 zbioru. Posłuży to do szukania średniego roku budowy wśród najpopularniejszych 25% ogłoszeń
+-- Through trial and error, I determined 300 upvotes as the criterion
+-- The number of listings with more than 300 upvotes is nearly 1/4 of the dataset. This will be used to find the average construction year among the top 25% of listings
+
+
+
 
 SELECT
 	AVG(b.building_year)::INT
@@ -268,14 +273,14 @@ FROM building AS b
 LEFT JOIN sales_offer AS o
 	ON b.apartment_id = o.apartment_id
 WHERE upvotes > 300;
---Średni rok budowy dla najpopularniejszych ogłoszeń to 1972
---Wniosek: Można przypuszczać, że dla zebranego zbioru danych ludzie chętniej szukali i interesowali się starszymi mieszkaniami (na przykład kamienicami, które okazały się najdroższe)
+-- The average construction year for the most popular listings is 1972
+-- Conclusion: It can be assumed that for the collected dataset, people were more interested in and searched for older apartments (e.g., tenement houses, which turned out to be the most expensive)
 
 
 
 
 
---Średnia cena mieszkań w każdym mieście
+-- What is the average price of apartments in each city?
 SELECT
 	AVG(a.price)::INT AS avg_price,
 	AVG(a.price / a.meters)::INT AS avg_pricem2,
@@ -286,13 +291,13 @@ LEFT JOIN localization AS l
 LEFT JOIN cities AS c
 	ON c.city_id = l.city_id
 GROUP BY c.city_name;
---Średnia cena mieszkania zachowuje się tak samo jak średnia cena za metr mieszkania
---Najdroższe mieszkania są w Sopocie, następnie w Gdyni. Nieznacznie tańsze mieszkania niż w Gdyni znajdują się w Gdańsku
+-- The average apartment price behaves similarly to the average price per square meter
+-- The most expensive apartments are in Sopot, followed by Gdynia. Slightly cheaper apartments than in Gdynia are in Gdańsk
 
 
 
 
---W jakich dzielnicach są najdroższe mieszkania? (cena za metr)
+-- In which districts are the most expensive apartments located? (price per square meter)
 SELECT
 	AVG(a.price / a.meters)::INT AS avg_pricem2,
 	d.district_name AS district,
@@ -306,15 +311,14 @@ LEFT JOIN cities AS c
 	ON c.city_id = l.city_id
 GROUP BY d.district_name, c.city_name
 ORDER BY avg_pricem2 DESC;
---Dla zbioru danych, najwyższa cena za metr jest dla dzielnic w kolejności: Grunwaldzka (Sopot), Śródmieście (Gdańsk) oraz Dolny Sopot
---Najniższa cena za metr jest w następujących dzielnicach: Ujeścisko-Łostowice, Dąbrowa, Łostowice
+-- For the dataset, the highest price per square meter is in the districts in the following order: Grunwaldzka (Sopot), Śródmieście (Gdańsk), and Lower Sopot
+-- The lowest price per square meter is in the following districts: Ujeścisko-Łostowice, Dąbrowa, Łostowice
 
 
 
 
 
-
---Czy w najdroższych/najtańszych dzielnicach są najdroższe/najtańsze ulice (pod względem ceny za metr)
+-- Are the most expensive streets in the most expensive districts? (price per square meter)
 SELECT
 	AVG(a.price / a.meters)::INT AS avg_pricem2,
 	s.street_name AS street,
@@ -331,15 +335,15 @@ LEFT JOIN cities AS c
 	ON c.city_id = l.city_id
 GROUP BY s.street_name, d.district_name, c.city_name
 ORDER BY avg_pricem2 DESC;
---Wśród najdroższych dzielnic najdroższe ulice to: Willa Morska dla Dolnego Sopotu oraz Stara Stocznia dla Śródmieścia
---Wśród najtańszych dzielnic najtańsze ulice to Oliwkowa dla Dąbrowy oraz Kryształowa dla Łostowic
+-- Among the most expensive districts, the most expensive streets are: Willa Morska for Lower Sopot and Stara Stocznia for Śródmieście
+-- Among the cheapest districts, the cheapest streets are: Oliwkowa for Dąbrowa and Kryształowa for Łostowice
 
 
 
 
 
 
---W którym mieście mieszkania są największe?
+-- Which city has the largest apartments?
 SELECT
 	AVG(a.meters)::INT AS avg_meters,
 	c.city_name AS city
@@ -349,12 +353,12 @@ LEFT JOIN localization AS l
 LEFT JOIN cities AS c
 	ON c.city_id = l.city_id
 GROUP BY c.city_name;
---Największe mieszkania ze znaczącą przewagą nad pozostałymi są w Sopocie
+-- The largest apartments, with a significant advantage over others, are in Sopot
 
 
 
 
---W której dzielnicy mieszkania są największe?
+-- In which district are the largest apartments?
 SELECT
 	AVG(a.meters)::INT AS avg_meters,
 	d.district_name AS district,
@@ -368,13 +372,13 @@ LEFT JOIN cities AS c
 	ON c.city_id = l.city_id
 GROUP BY d.district_name, c.city_name
 ORDER BY avg_meters DESC;
---Największe mieszkania w zbiorze danych można znaleźć w Dolnym Sopocie, Kamiennej górze oraz Dąbrowie
+-- The largest apartments in the dataset can be found in Lower Sopot, Kamienna Góra, and Dąbrowa
 
 
 
 
 
---W jakich dzielnicach mieszkań na sprzedaż jest najwięcej?
+-- In which districts are there the most apartments for sale?
 SELECT
 	COUNT(*) AS number_of_offers,
 	d.district_name AS district,
@@ -388,12 +392,12 @@ LEFT JOIN cities AS c
 	ON c.city_id = l.city_id
 GROUP BY d.district_name, c.city_name
 ORDER BY number_of_offers DESC;
---Najwięcej mieszkań na sprzedaż w zbiorze jest w Gdańsku w dzielnicach: Ujeścisko-Łostowice, Śródmieście, Przymorze
+-- The most apartments for sale in the dataset are in Gdańsk, in the districts: Ujeścisko-Łostowice, Śródmieście, Przymorze
 
 
 
 
---Czy dzielnica z największą ilością mieszkań na sprzedaż to nowe czy starsze osiedla? (rynek pierwotny czy rynek wtórny)
+-- Are the districts with the most apartments for sale new or older developments? (primary or secondary market)
 SELECT
 	COUNT(m.market_type) AS market_count, 
 	m.market_type,
@@ -408,16 +412,16 @@ LEFT JOIN districts AS d
 WHERE d.district_name IN ('Ujeścisko-Łostowice', 'Śródmieście', 'Przymorze')
 GROUP BY m.market_type, d.district_name
 ORDER BY market_count DESC;
---W 2 z 3 dzielnic z największą ilością mieszkań na sprzedaż, wszystkie mieszkania są na sprzedaż z rynku pierwotnego
---Wniosek: W dzielnicach z dużą ilością mieszkań na sprzedaż najprawdopodobniej są sprzedawane nowe inwestycje deweloperskie
+-- In 2 out of 3 districts with the most apartments for sale, all apartments are for sale from the primary market
+-- Conclusion: In districts with a large number of apartments for sale, it is likely that new development projects are being sold
 
 
 
 
 
 
---Czy istnieje zależność między ceną mieszkań w dzielnicy a popularnością oferty sprzedaży?
---Czy ludzie częściej interesują się najdroższymi dzielnicami czy najtańszymi?
+-- Is there a correlation between the price of apartments in a district and the popularity of the sales offer?
+-- Do people show more interest in the most expensive districts or the cheapest ones?
 SELECT
 	d.district_name AS district,
 	c.city_name AS city,
@@ -431,19 +435,18 @@ LEFT JOIN sales_offer AS s
 	ON s.apartment_id = l.apartment_id
 GROUP BY c.city_name, d.district_name
 ORDER BY popularity DESC;
---3 najpopularniejsze dzielnice (pod względem liczby podbić oferty) to Łostowice, Dolny Sopot oraz Redłowo
---Łostowice znalazły się w zestawieniu najtańszych dzielnic, a Dolny Sopot w najdroższych dzielnicach
---Wniosek: skrajne dzielnice pod względem ceny (najtańsze oraz najdroższe) mogą cieszyć się większą popularnością jeśli chodzi o ogłoszenie sprzedaży
+-- The top 3 most popular districts (in terms of the number of listing upvotes) are Łostowice, Dolny Sopot, and Redłowo
+-- Łostowice is among the cheapest districts, while Dolny Sopot is among the most expensive
+-- Conclusion: Extreme price districts (both the cheapest and the most expensive) may enjoy greater popularity in terms of sales listings
 
 
 
 
 
 
---jakie metraże mieszkań mają największą popularność (liczba podbić)?
---(Średnia powierzchnia mieszkania dla ogłoszeń z liczbą podbić znajdującą się w 25% ogłoszeń z największą liczbą podbić)
-SELECT (ROUND((SELECT COUNT(*) FROM sales_offer WHERE upvotes > 300) / COUNT(*)::DECIMAL, 2) * 100) AS top_percentage FROM sales_offer;
---ogłoszenia powyżej 300 podbić stanowią 24% najpopularniejszych ogłoszeń
+-- What sizes of apartments have the greatest popularity (number of upvotes)?
+-- (Average apartment size for listings with upvotes in the top 25% of listings with the highest number of upvotes)
+-- Listings with more than 300 upvotes account for 24% of the most popular listings
 
 SELECT
 	AVG(a.meters)::INT AS avg_meters
@@ -451,12 +454,12 @@ FROM apartment AS a
 LEFT JOIN sales_offer AS s
 	ON s.apartment_id = a.id
 WHERE s.upvotes > 300;
---Średnia powierzchnia mieszkań wśród 24% najbardziej popularnych to 86 m^2.
+--Average aparment's area among 24% most popular sales offers equals 86m2.
 
 
 
 
---Który rynek ma większą liczbę podbić?
+-- Which market has a greater number of upvotes?
 SELECT
 	m.market_type AS market,
 	AVG(s.upvotes)::INT AS popularity
@@ -466,10 +469,10 @@ LEFT JOIN market_key AS m
 LEFT JOIN sales_offer AS s
 	ON s.apartment_id = b.apartment_id
 GROUP BY m.market_type;
---Średnia liczba podbić dla rynku wtórnego i pierwotnego jest niemalże identyczna
+-- The average number of upvotes for the secondary and primary markets is almost identical
 
 
 
 
 
---Podsumowanie: najdroższe mieszkania to niekoniecznie największe powierzchniowo mieszkania, jednak z pewnością są to mieszkania o ponad przeciętnej powierzchni, Średnio mieszkania gotowe do zamieszkania są o 1700pln (za metr kw.) droższe od mieszkań wymagających wykończenia. Średnia cena za m2 z uwzględnieniem rynku jest wyższa o prawie 3000pln dla rynku wtórnego, jednak popularność (pod względem ilości podbić oferty na stronie) jest identyczna między rynkiem wtórnym a pierwotnym. Mieszkania o najwyższej cenie za metr kw. znajdują się w kamienicach, co potwierdza również fakt, że droższe mieszkania są w budynkach z lat 1930 i starszych (stare kamienice po renowacji).  W materiałach nie ma zauważalnej różnicy cen (za metr), jednak jako najdroższe plasują się mieszkania z konstrukcji żelbetowej. Średni rok budowy dla najpopularniejszych ogłoszeń to rok 1972, można więc przypuszczać, że najwięcej ludzi szuka mieszkań w starszych konstrukcjach (np. kamienicach) pomimo (przeważnie) wyższej wycenie. Najdroższe mieszkania są w Sopocie, następnie w Gdyni. Nieznacznie tańsze mieszkania niż w Gdyni znajdują się w Gdańsku. Dla zbioru danych, najwyższa cena za metr jest dla dzielnic w kolejności: Grunwaldzka (Sopot), Śródmieście (Gdańsk) oraz Dolny Sopot, najtańsze dzielnice to: Ujeścisko-Łostowice, Dąbrowa, Łostowice. Zdecydowanie największe mieszkania są w Sopocie (może to iść w parze z najwyższą ceną mieszkań oraz najwyższą ceną za metr w starych kamienicach). W dzielnicach z dużą ilością mieszkań na sprzedaż najprawdopodobniej są sprzedawane nowe inwestycje deweloperskie. Skrajne dzielnice pod względem ceny (najtańsze oraz najdroższe za metr) mogą cieszyć się większą popularnością jeśli chodzi o ogłoszenie sprzedaży. Pomimo różnic w cenach, rynek wtórny cieszy się jednakową popularnością (liczba podbić ogłoszenia) jak rynek pierwotny.
+--Summary: The most expensive apartments are not necessarily the largest in terms of area, but they are certainly above average in size. On average, move-in-ready apartments are 1700 PLN more expensive per square meter than those needing renovation. The average price per square meter is nearly 3000 PLN higher for secondary market properties, although popularity (in terms of the number of listing upvotes) is identical between secondary and primary markets. The highest price per square meter is found in historic tenements, which is also supported by the fact that more expensive apartments are in buildings from 1930 or earlier (old tenements after renovation). There is no noticeable price difference per square meter among materials, though reinforced concrete buildings are the most expensive. The average construction year for the most popular listings is 1972, suggesting that people are more likely to search for older buildings (e.g., tenements) despite their generally higher prices. The most expensive apartments are in Sopot, followed by Gdynia, with slightly cheaper apartments in Gdańsk. In the dataset, the highest price per square meter is found in districts in the following order: Grunwaldzka (Sopot), Śródmieście (Gdańsk), and Dolny Sopot. The cheapest districts are: Ujeścisko-Łostowice, Dąbrowa, and Łostowice. By far, the largest apartments are in Sopot (which may correlate with the highest apartment prices and the highest price per square meter in old tenements). In districts with a large number of apartments for sale, new development projects are likely being sold. Extreme price districts (both the cheapest and the most expensive per square meter) may enjoy greater popularity in terms of sales listings. Despite price differences, the secondary market enjoys the same level of popularity (number of listing upvotes) as the primary market.
