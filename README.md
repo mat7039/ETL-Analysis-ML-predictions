@@ -3,6 +3,7 @@ In other words, the project aims to build a program in which user can add parame
 
 The motivation for undertaking the project is the desire to expand the range of tools that help in selecting the right offers on the real estate market, increasing awareness of the current state of the market, and the most important factors affecting the price of an apartment.
 
+Project process overview:
 ![image](https://github.com/user-attachments/assets/9af54043-0fcf-44d1-8f92-e22fffa646f6)
 
 
