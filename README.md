@@ -33,5 +33,6 @@ Database schema after data modeling:
 
 
 Final results:
-![image](https://github.com/user-attachments/assets/bd2a50b4-c7ca-48a7-93a8-c56db4ee1e10)
+![image](https://github.com/user-attachments/assets/cc3638a4-e3ab-4481-9d0b-108e6cbf8382)
+
 
